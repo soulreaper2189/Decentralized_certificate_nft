@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aptos Certificate System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .role-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .role-card:hover {
+            transform: translateY(-5px);
+        }
+        .wallet-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .connect-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Aptos Certificate Verification System</h1>
+        
+        <div class="wallet-section">
+            <h3>Connect Your Petra Wallet</h3>
+            <button class="connect-btn" onclick="connectWallet()">Connect Petra Wallet</button>
+            <div id="wallet-status" class="status">Wallet not connected</div>
+        </div>
+
+        <div class="role-section">
+            <h2>Select Your Role</h2>
+            
+            <div class="role-card" onclick="selectRole('college')">
+                <h3>🏫 College</h3>
+                <p>Upload and mint student certificates on the Aptos blockchain</p>
+            </div>
+            
+            <div class="role-card" onclick="selectRole('company')">
+                <h3>🏢 Company</h3>
+                <p>Verify candidate certificates from the Aptos blockchain</p>
+            </div>
+            
+            <div class="role-card" onclick="selectRole('student')">
+                <h3>👨‍🎓 Student</h3>
+                <p>Retrieve and view your verified certificates from Aptos</p>
+            </div>
+        </div>
+
+        <div id="role-content" class="status" style="display: none;">
+            <h3 id="role-title">Role Selected</h3>
+            <div id="role-description">Select a role above to get started</div>
+        </div>
+    </div>
+
+    <script>
+        let isConnected = false;
+        let selectedRole = '';
+
+        function connectWallet() {
+            if (typeof window.aptos !== 'undefined') {
+                window.aptos.connect()
+                    .then(response => {
+                        isConnected = true;
+                        document.getElementById('wallet-status').innerHTML = 
+                            `✅ Wallet Connected: ${response.address.slice(0, 6)}...${response.address.slice(-4)}`;
+                        document.getElementById('wallet-status').style.background = 'rgba(76, 175, 80, 0.3)';
+                    })
+                    .catch(error => {
+                        document.getElementById('wallet-status').innerHTML = 
+                            `❌ Connection Failed: ${error.message}`;
+                        document.getElementById('wallet-status').style.background = 'rgba(244, 67, 54, 0.3)';
+                    });
+            } else {
+                document.getElementById('wallet-status').innerHTML = 
+                    '❌ Petra Wallet not found. Please install from <a href="https://petra.app/" target="_blank">petra.app</a>';
+                document.getElementById('wallet-status').style.background = 'rgba(255, 193, 7, 0.3)';
+            }
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            const roleContent = document.getElementById('role-content');
+            const roleTitle = document.getElementById('role-title');
+            const roleDescription = document.getElementById('role-description');
+            
+            roleContent.style.display = 'block';
+            
+            switch(role) {
+                case 'college':
+                    roleTitle.textContent = '🏫 College Portal';
+                    roleDescription.innerHTML = `
+                        <h4>Upload Student Certificate</h4>
+                        <p>This portal allows colleges to:</p>
+                        <ul>
+                            <li>Upload student certificates to IPFS</li>
+                            <li>Mint certificates on Aptos blockchain</li>
+                            <li>Track all uploaded certificates</li>
+                        </ul>
+                        <p><strong>Status:</strong> ${isConnected ? '✅ Ready to use' : '❌ Please connect wallet first'}</p>
+                    `;
+                    break;
+                case 'company':
+                    roleTitle.textContent = '🏢 Company Portal';
+                    roleDescription.innerHTML = `
+                        <h4>Verify Certificates</h4>
+                        <p>This portal allows companies to:</p>
+                        <ul>
+                            <li>Search for candidate certificates</li>
+                            <li>Verify certificates on blockchain</li>
+                            <li>View verification history</li>
+                        </ul>
+                        <p><strong>Status:</strong> ${isConnected ? '✅ Ready to use' : '❌ Please connect wallet first'}</p>
+                    `;
+                    break;
+                case 'student':
+                    roleTitle.textContent = '👨‍🎓 Student Portal';
+                    roleDescription.innerHTML = `
+                        <h4>Retrieve Certificates</h4>
+                        <p>This portal allows students to:</p>
+                        <ul>
+                            <li>Search for their certificates</li>
+                            <li>View verification status</li>
+                            <li>Access IPFS-stored files</li>
+                        </ul>
+                        <p><strong>Status:</strong> ${isConnected ? '✅ Ready to use' : '❌ Please connect wallet first'}</p>
+                    `;
+                    break;
+            }
+        }
+
+        // Check if Petra wallet is available
+        window.addEventListener('load', function() {
+            if (typeof window.aptos !== 'undefined') {
+                document.getElementById('wallet-status').innerHTML = 
+                    '🟡 Petra Wallet detected. Click connect to proceed.';
+            }
+        });
+    </script>
+</body>
+</html>
